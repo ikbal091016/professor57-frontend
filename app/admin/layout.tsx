@@ -23,8 +23,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (!user || (user.role !== "admin" && user.role !== "instructor")) {
     return (
       <main className="mx-auto max-w-md px-6 py-24 text-center">
-        <p className="font-display text-2xl text-forest">Staff access only</p>
+        <Link href="/" className="font-display italic text-xl text-forest">
+          Professor57
+        </Link>
+        <p className="mt-10 font-display text-2xl text-forest">Staff access only</p>
         <p className="mt-2 text-forest/60">This area is for course admins and instructors.</p>
+        <div className="mt-6 flex justify-center gap-3">
+          <Link href="/" className="rounded-md border border-rule px-4 py-2 text-sm text-forest">
+            Back to home
+          </Link>
+          {!user && (
+            <Link href="/login?next=/admin" className="rounded-md bg-forest px-4 py-2 text-sm text-paper">
+              Sign in
+            </Link>
+          )}
+        </div>
       </main>
     );
   }
@@ -32,7 +45,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="grid min-h-screen grid-cols-[220px_1fr]">
       <aside className="border-r border-rule bg-white px-4 py-8">
-        <p className="px-3 font-display italic text-lg text-forest">Professor57</p>
+        <Link href="/" className="px-3 font-display italic text-lg text-forest">
+          Professor57
+        </Link>
         <p className="px-3 text-xs text-forest/40">Admin</p>
         <nav className="mt-6 space-y-1">
           {NAV.map(({ href, label, icon: Icon }) => {
