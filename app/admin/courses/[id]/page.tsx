@@ -92,6 +92,66 @@ function LectureForm({
   );
 }
 
+function ResourceEditor({
+  lecture,
+  onAdd,
+  onRemove,
+}: {
+  lecture: LectureRecord;
+  onAdd: (title: string, url: string) => void;
+  onRemove: (index: number) => void;
+}) {
+  const [title, setTitle] = useState("");
+  const [url, setUrl] = useState("");
+
+  return (
+    <div className="mt-2 rounded border border-dashed border-rule p-2">
+      <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-forest/40">
+        Attachments (slides, PDF, images — paste a Google Drive/Dropbox link)
+      </p>
+      {(lecture.resources || []).length > 0 && (
+        <ul className="mb-2 space-y-1">
+          {lecture.resources.map((r, i) => (
+            <li key={i} className="flex items-center justify-between text-xs text-forest/70">
+              <a href={r.url} target="_blank" rel="noreferrer" className="truncate text-lime-dark hover:underline">
+                {r.title}
+              </a>
+              <button onClick={() => onRemove(i)} className="ml-2 shrink-0 text-red-500 hover:text-red-700">
+                <Trash2 size={12} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className="flex items-center gap-1.5">
+        <input
+          placeholder="Title (e.g. Slides)"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-28 rounded border border-rule px-2 py-1 text-xs"
+        />
+        <input
+          placeholder="https://..."
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          className="flex-1 rounded border border-rule px-2 py-1 text-xs"
+        />
+        <button
+          onClick={() => {
+            if (!title || !url) return;
+            onAdd(title, url);
+            setTitle("");
+            setUrl("");
+          }}
+          className="rounded bg-forest/10 px-2 py-1 text-xs font-medium text-forest hover:bg-forest/20"
+        >
+          Add
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function CourseEditPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -189,6 +249,18 @@ export default function CourseEditPage() {
 
   async function handleUpdateVideoRef(lecture: LectureRecord, videoRef: string) {
     const res = await updateLecture(lecture._id, { videoRef }, accessToken);
+    setLectures((prev) => prev.map((l) => (l._id === lecture._id ? res.lecture : l)));
+  }
+
+  async function handleAddResource(lecture: LectureRecord, title: string, url: string) {
+    const resources = [...(lecture.resources || []), { title, url }];
+    const res = await updateLecture(lecture._id, { resources }, accessToken);
+    setLectures((prev) => prev.map((l) => (l._id === lecture._id ? res.lecture : l)));
+  }
+
+  async function handleRemoveResource(lecture: LectureRecord, index: number) {
+    const resources = (lecture.resources || []).filter((_, i) => i !== index);
+    const res = await updateLecture(lecture._id, { resources }, accessToken);
     setLectures((prev) => prev.map((l) => (l._id === lecture._id ? res.lecture : l)));
   }
 
@@ -320,6 +392,11 @@ export default function CourseEditPage() {
                       placeholder={lecture.videoProvider === "mux" ? "Mux playback ID" : "YouTube video ID"}
                       onBlur={(e) => e.target.value !== lecture.videoRef && handleUpdateVideoRef(lecture, e.target.value)}
                       className="mt-1.5 w-full rounded border border-rule bg-paper px-2 py-1 text-xs text-forest/70"
+                    />
+                    <ResourceEditor
+                      lecture={lecture}
+                      onAdd={(title, url) => handleAddResource(lecture, title, url)}
+                      onRemove={(index) => handleRemoveResource(lecture, index)}
                     />
                   </li>
                 ))}
