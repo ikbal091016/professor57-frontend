@@ -166,7 +166,7 @@ export default function CourseDetailPage() {
       {activeLecture && activeLecture.resources && activeLecture.resources.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
           {activeLecture.resources.map((r, i) => (
-            
+            <a
               key={i}
               href={r.url}
               target="_blank"
