@@ -177,6 +177,21 @@ export default function CourseEditPage() {
     setUploadInfo({ lectureId, url: res.uploadUrl });
   }
 
+  async function handleToggleProvider(lecture: LectureRecord) {
+    const nextProvider = lecture.videoProvider === "mux" ? "youtube" : "mux";
+    const res = await updateLecture(
+      lecture._id,
+      { videoProvider: nextProvider, videoRef: lecture.videoRef || "pending" },
+      accessToken
+    );
+    setLectures((prev) => prev.map((l) => (l._id === lecture._id ? res.lecture : l)));
+  }
+
+  async function handleUpdateVideoRef(lecture: LectureRecord, videoRef: string) {
+    const res = await updateLecture(lecture._id, { videoRef }, accessToken);
+    setLectures((prev) => prev.map((l) => (l._id === lecture._id ? res.lecture : l)));
+  }
+
   return (
     <main className="mx-auto max-w-3xl p-10">
       <div className="flex items-center justify-between">
@@ -263,34 +278,49 @@ export default function CourseEditPage() {
 
               <ul className="divide-y divide-rule">
                 {sectionLectures.map((lecture, lIndex) => (
-                  <li key={lecture._id} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
-                    <span className="text-forest">{lecture.title}</span>
-                    <div className="flex items-center gap-2">
-                      {lecture.videoProvider === "mux" && (
+                  <li key={lecture._id} className="px-4 py-2.5 text-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-forest">{lecture.title}</span>
+                      <div className="flex items-center gap-2">
+                        {lecture.videoProvider === "mux" && (
+                          <button
+                            onClick={() => handleRequestUpload(lecture._id)}
+                            title="Get a Mux upload URL"
+                            className="text-forest/40 hover:text-forest"
+                          >
+                            <Upload size={14} />
+                          </button>
+                        )}
                         <button
-                          onClick={() => handleRequestUpload(lecture._id)}
-                          title="Get a Mux upload URL"
-                          className="text-forest/40 hover:text-forest"
+                          onClick={() => handleToggleProvider(lecture)}
+                          className="rounded-full border border-rule px-2 py-0.5 text-xs text-forest/60 hover:border-forest"
+                          title="Switch between YouTube and Mux"
                         >
-                          <Upload size={14} />
+                          {lecture.videoProvider === "mux" ? "Mux" : "YouTube"}
                         </button>
-                      )}
-                      <button
-                        onClick={() => handleToggleFree(lecture)}
-                        className={`rounded-full px-2 py-0.5 text-xs ${lecture.isFree ? "bg-leaf/10 text-leaf" : "bg-forest/10 text-forest/50"}`}
-                      >
-                        {lecture.isFree ? "Free" : "Locked"}
-                      </button>
-                      <button onClick={() => handleMoveLecture(section._id, lIndex, -1)} className="text-forest/40 hover:text-forest">
-                        <ChevronUp size={14} />
-                      </button>
-                      <button onClick={() => handleMoveLecture(section._id, lIndex, 1)} className="text-forest/40 hover:text-forest">
-                        <ChevronDown size={14} />
-                      </button>
-                      <button onClick={() => handleDeleteLecture(lecture._id)} className="text-red-500 hover:text-red-700">
-                        <Trash2 size={14} />
-                      </button>
+                        <button
+                          onClick={() => handleToggleFree(lecture)}
+                          className={`rounded-full px-2 py-0.5 text-xs ${lecture.isFree ? "bg-leaf/10 text-leaf" : "bg-forest/10 text-forest/50"}`}
+                        >
+                          {lecture.isFree ? "Free" : "Locked"}
+                        </button>
+                        <button onClick={() => handleMoveLecture(section._id, lIndex, -1)} className="text-forest/40 hover:text-forest">
+                          <ChevronUp size={14} />
+                        </button>
+                        <button onClick={() => handleMoveLecture(section._id, lIndex, 1)} className="text-forest/40 hover:text-forest">
+                          <ChevronDown size={14} />
+                        </button>
+                        <button onClick={() => handleDeleteLecture(lecture._id)} className="text-red-500 hover:text-red-700">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </div>
+                    <input
+                      defaultValue={lecture.videoRef}
+                      placeholder={lecture.videoProvider === "mux" ? "Mux playback ID" : "YouTube video ID"}
+                      onBlur={(e) => e.target.value !== lecture.videoRef && handleUpdateVideoRef(lecture, e.target.value)}
+                      className="mt-1.5 w-full rounded border border-rule bg-paper px-2 py-1 text-xs text-forest/70"
+                    />
                   </li>
                 ))}
               </ul>
