@@ -42,6 +42,7 @@ export interface LectureRecord {
   durationSec: number;
   order: number;
   isFree: boolean;
+  resources: { title: string; url: string }[];
 }
 
 export function fetchCourseForEditing(courseId: string, accessToken: string | null) {
