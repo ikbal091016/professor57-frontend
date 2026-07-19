@@ -163,6 +163,22 @@ export default function CourseDetailPage() {
         )}
       </div>
 
+      {activeLecture && activeLecture.resources && activeLecture.resources.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {activeLecture.resources.map((r, i) => (
+            
+              key={i}
+              href={r.url}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-md border border-rule bg-white px-3 py-1.5 text-sm text-lime-dark hover:border-lime"
+            >
+              {r.title}
+            </a>
+          ))}
+        </div>
+      )}
+
       <div className="mt-8 grid gap-8 sm:grid-cols-[1fr_260px]">
         <div className="divide-y divide-rule rounded-lg border border-rule bg-white">
           {sections.map((section) => (
